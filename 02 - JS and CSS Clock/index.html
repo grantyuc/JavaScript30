@@ -61,7 +61,7 @@
       background: black;
       position: absolute;
       top: calc(50% - 3px);
-      transition: 0.5s cubic-bezier(0, 1.20, 0.7, 1.05);
+      transition: 0.5s linear(0 0%, 0.22 2.1%, 0.86 6.5%, 1.11 8.6%, 1.3 10.7%, 1.35 11.8%, 1.37 12.9%, 1.37 13.7%, 1.36 14.5%, 1.32 16.2%, 1.03 21.8%, 0.94 24%, 0.89 25.9%, 0.88 26.85%, 0.87 27.8%, 0.87 29.25%, 0.88 30.7%, 0.91 32.4%, 0.98 36.4%, 1.01 38.3%, 1.04 40.5%, 1.05 42.7%, 1.05 44.1%, 1.04 45.7%, 1 53.3%, 0.99 55.4%, 0.98 57.5%, 0.99 60.7%, 1 68.1%, 1.01 72.2%, 1 86.7%, 1 100%);
       transform: rotate(90deg);
       transform-origin: right;
     }
@@ -90,40 +90,55 @@
     minHand = document.querySelector('.min-hand');
     hourHand = document.querySelector('.hour-hand');
 
-    function turnOffTransition(hand) {
-      hand.style.transition = `none`;
-    }
+    // function turnOffTransition(hand) {
+    //   hand.style.transition = 'none';
+    // }
 
-    function turnOnTransition(hand) {
-      hand.style.transition = `0.5s cubic-bezier(0, 1.20, 0.7, 1.05)`;
-    }
+    // function turnOnTransition(hand) {
+    //   hand.style.transition = '';
+    // }
 
-    function handleTransition(count, hand) {
-      if (count == 0) {
-        turnOffTransition(hand);
-      } else {
-        turnOnTransition(hand);
+    function handleTransition(hand, targetDegrees) {
+      let currentDegrees = +hand.style.transform.match(/\d+.?\d+/g);
+
+      if (targetDegrees < currentDegrees) {
+        // console.log('current', currentDegrees);
+        // console.log('target', targetDegrees);
+
+        // turnOffTransition(hand);  // Bad
+        hand.style.transition = 'none';
+
+        hand.style.transform = `rotate(${currentDegrees - 360}deg)`;
+
+        // turnOnTransition(hand);  // Bad
+        // setTimeout(turnOnTransition(hand), 1);  // Bad
+        setTimeout(() => hand.style.transition = '', 1);
       }
+
+      setTimeout(() => hand.style.transform = `rotate(${targetDegrees}deg)`, 1);
     }
 
     function setTime() {
       const now = new Date();
 
-      const seconds = now.getSeconds();
-      const minutes = now.getMinutes() + seconds / 60;
-      const hours = now.getHours() + minutes / 60;
+      // const millisInt = now.getMilliseconds();
+      const secondsInt = now.getSeconds();
+      const minutesInt = now.getMinutes();
+      const hoursInt = now.getHours();
+      console.log(`${hoursInt}:${minutesInt}:${secondsInt}`);
+
+      // const seconds = secondsInt + millisInt / 1000;  // for shorter interval
+      const seconds = secondsInt;
+      const minutes = minutesInt + seconds / 60;
+      const hours = hoursInt + minutes / 60;
 
       const secondsDegrees = seconds / 60 * 360 + 90;
       const minsDegrees = minutes / 60 * 360 + 90;
       const hoursDegrees = hours / 12 * 360 + 90;
 
-      handleTransition(seconds, secondHand);
-      handleTransition(minutes, minHand);
-      handleTransition(hours, hourHand);
-
-      secondHand.style.transform = `rotate(${secondsDegrees}deg)`
-      minHand.style.transform = `rotate(${minsDegrees}deg)`
-      hourHand.style.transform = `rotate(${hoursDegrees}deg)`
+      handleTransition(secondHand, secondsDegrees);
+      handleTransition(minHand, minsDegrees);
+      handleTransition(hourHand, hoursDegrees);
     }
 
     setInterval(setTime, 1000);
